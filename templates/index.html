@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="container p-4 form_data">
+  <form method="post" action="{{ url_for('index') }}">  
+    <section class="container text-center md">
+      <h1>Sign In</h1>
+      <p class="lead">Log in to Your Account</p>
+    </section>
+
+    <hr>
+
+    {% if msg %} 
+    <div class="text-center my-2">
+      <span class="badge text-bg-danger w-100 py-2">{{ msg }}</span>
+    </div>  
+    {% endif %}
+    
+    <div class="row mb-3">
+      <label for="exampleFormControlInput1" class="form-label">Email address</label>
+        <input type="email" class="form-control" id="exampleFormControlInput1" placeholder="name@example.com" name="email">
+    </div>
+   
+    <div class="row mb-3">
+      <label for="inputPassword5" class="form-label">Password</label>
+        <input type="password" id="inputPassword5" class="form-control" aria-describedby="passwordHelpBlock" name="password">
+    </div>
+   
+    <div class="mb-3 text-center">
+      <button type="submit" class="btn btn-outline-success" name="signIn">Sign In</button>
+    </div>
+  
+    <hr>
+  
+    <div class="container text-center">
+      Don't Have an Account?
+        <a href="{{ url_for('register') }}">
+          <button class="btn btn-outline-primary btn-sm" type="button">Sign Up</button>
+      </a>
+    </div>
+  </form>
+  </section>
+{% endblock %}

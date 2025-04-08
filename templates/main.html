@@ -1,0 +1,15 @@
+{% extends "base1.html" %}
+
+{% block content %}
+<section class="container back_home my-1">
+  <a href="{{ url_for('home') }}">
+      <button class="btn btn-success" type="button">Back to Home</button>
+  </a>
+</section>
+<section class="container text-center">
+  <p class="lead text-center">Real-time Emotion Recognition</p>
+    <div class="container mb-3 text-center">            
+        <img src="{{ url_for('video')}}" class="container-sm mb-3 text-center rounded" style=" max-width:600px;">            
+    </div>        
+</section>
+{% endblock %}

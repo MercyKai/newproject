@@ -1,0 +1,25 @@
+{% extends "base1.html" %}
+
+{% block content %}
+<section class="container text-center md my-3">
+    <h1>Welcome to CalmSpace</h1>
+  </section>
+  
+  <section class="container p-4 mb-5 form_data">
+    <p class="lead text-center">What would you like to do?</p>
+
+    <hr>
+
+    <div class="container my-4">
+      <a href="{{ url_for('predict') }}">
+        <button class="btn btn-outline-primary text-black w-100" type="button">Image Prediction</button>
+      </a>
+    </div>
+
+    <div class="container my-4">
+      <a href="{{ url_for('main') }}">
+        <button class="btn btn-outline-warning text-black w-100" type="button">Real-time Emotion Recognition</button>
+      </a>
+    </div>    
+</section>
+{% endblock %}
