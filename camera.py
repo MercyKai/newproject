@@ -4,7 +4,7 @@ import numpy as np
 from tensorflow.keras.models import load_model
 
 # Load the pre-trained model
-model = load_model("final_model.h5")
+model = load_model("new_model.h5")
 
 # Load Haar Cascade for face detection
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
@@ -59,7 +59,7 @@ def process_image(image_path, output_path):
     # Read the image
     image = cv2.imread(image_path)
     if image is None:
-        # Return None if image is invalid
+        #  
         return None
 
    # Convert image to grayscale
