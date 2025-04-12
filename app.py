@@ -2,14 +2,15 @@
 from flask import Flask,render_template,request,session,redirect,url_for,Response
 from flask_mysqldb import MySQL
 import MySQLdb.cursors
-import re
-from camera import VideoCamera
-import os
+import re, os
+from camera import VideoCamera, process_image
 from werkzeug.utils import secure_filename
-from camera import process_image
 
 # Initialize the web app
 app = Flask(__name__)
+
+# secret key for sessions
+app.secret_key='default_key'
 
 # configure for file uploads, the allowed file types and storage
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
@@ -19,9 +20,6 @@ app.config['PREDICTED_FOLDER'] = PREDICTED_FOLDER
 # check if uploaded file has the allowed extension
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-# secret key for sessions
-app.secret_key='default_key'
 
 # Database configuration
 app.config['MYSQL_HOST']='localhost'
@@ -105,15 +103,13 @@ def predict():
         # only allow image files
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            predicted_path=os.path.join(app.config['PREDICTED_FOLDER'], filename)
             # write the filename for the predicted image
             predicted_filename = "predicted_" + filename
             # path for the saving the predicted image
-            predicted_path = os.path.join(PREDICTED_FOLDER, predicted_filename)
+            predicted_path = os.path.join(app.config['PREDICTED_FOLDER'], predicted_filename)
             file.save(predicted_path)
             # call the process image function to predict the image
             result=process_image(predicted_path, predicted_path)
-
             # display the processed image
             return render_template('predict.html', image_path=predicted_filename)
         else:
@@ -140,9 +136,7 @@ def video():
 # logout user when they press logout
 @app.route('/logout')
 def logout():
-    session.pop('loggedin',None)
-    session.pop('id',None)
-    session.pop('email',None)
+    session.clear()
     return redirect(url_for('index'))
 
 if __name__ == "__main__":
