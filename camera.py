@@ -59,7 +59,6 @@ def process_image(image_path, output_path):
     # Read the image
     image = cv2.imread(image_path)
     if image is None:
-        #  
         return None
 
    # Convert image to grayscale

@@ -1,11 +1,6 @@
 {% extends "base1.html" %}
 
 {% block content %}
-<section class="container back_home my-1">
-    <a href="{{ url_for('home') }}">
-        <button class="btn btn-success" type="button">Back to Home</button>
-    </a>
-</section>
 <section class="container p-4 mb-5 form_data">
     <p class="lead text-center">Image Prediction</p>
         <hr>
@@ -14,7 +9,7 @@
             <span class="badge text-bg-danger w-100 py-2">{{ msg }}</span>
         </div>  
         {% endif %}
-            <div class="mb-3 container-sm">
+            <div class="mb-2 container-sm">
                 <label for="formFile" class="form-label lead">Select an image for prediction:</label>
                     <form method="POST" enctype="multipart/form-data" action="{{ url_for('predict') }}">
                         <input class="form-control" type="file" id="formFile" name="imagefile" required>
@@ -24,7 +19,7 @@
 
             <hr>
 
-            <div class="mb-3 container-sm text-center">
+            <div class="mb-2 container-sm text-center">
                 {% if image_path %}
                 <p class="lead">Predicted image</p>
                     <img src ="{{ url_for('static', filename='predicted/' + image_path) }}" class="img-fluid">
