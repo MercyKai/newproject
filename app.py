@@ -17,7 +17,7 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 PREDICTED_FOLDER = os.path.join('static', 'predicted')
 app.config['PREDICTED_FOLDER'] = PREDICTED_FOLDER
 
-# check if uploaded file has the allowed extension
+# check if uploaded file has an allowed extension
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -59,26 +59,26 @@ def index():
 def register():
     msg=''
     if request.method=='POST':
-        #get the form data
+        # Get the form data
         fName=request.form['fName']
         lName=request.form['lName']
-        gender=request.form['gender']
-        email=request.form['email']
+        email=request.form['email']        
         password=request.form['password']
 
+        # Create a cursor
         cursor =mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute('SELECT * FROM users WHERE email=%s',(email,))
-        #check if the email already exists
+        # Check if the email already exists
         account=cursor.fetchone()
         if account:
-            #display an error message, if the email already exists
+            # Display an error message, if the email already exists
             msg='Email already exists!'
-            # ensure the format is correct
-        elif not re.match(r'^[a-zA-Z0-9]+(?:\.[a-zA-Z0-9]+)*@gmail\.com$', email):
+            # Ensure the format is correct
+        elif not re.match(r'^[a-zA-Z0-9](\.?[a-zA-Z0-9]){5,29}@gmail\.com$', email):
             msg = 'Invalid email address!'
         else:
-            cursor.execute('INSERT INTO users (fName,lName,gender,email,password) VALUES (%s,%s,%s,%s,%s)',(fName,lName,gender,email,password))
-            #commit the data to the database
+            cursor.execute('INSERT INTO users (fName,lName,email,password) VALUES (%s,%s,%s,%s)',(fName,lName,email,password))
+            # Commit the data to the database
             mysql.connection.commit()
             return redirect(url_for('index'))
     return render_template('register.html',msg=msg)
@@ -105,7 +105,7 @@ def predict():
             filename = secure_filename(file.filename)
             # write the filename for the predicted image
             predicted_filename = "predicted_" + filename
-            # path for the saving the predicted image
+            # Define filename for the predicted image
             predicted_path = os.path.join(app.config['PREDICTED_FOLDER'], predicted_filename)
             file.save(predicted_path)
             # call the process image function to predict the image

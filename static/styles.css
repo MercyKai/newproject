@@ -11,10 +11,6 @@ body {
     border-radius: 8px;
 }
 
-.back_home {
-    max-width: 600px; 
-}
-
 .footer {
     font-size: 12px;
     background: linear-gradient(to top, #6a5acd, #ede6ff);

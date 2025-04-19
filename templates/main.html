@@ -1,10 +1,13 @@
 {% extends "base1.html" %}
 
 {% block content %}
+
 <section class="container text-center">
-  <p class="lead text-center">Real-time Emotion Recognition</p>
+  <p class="lead text-center m-2">Real-time Emotion Recognition</p>
+  <hr>
     <div class="container mb-3 text-center">            
         <img src="{{ url_for('video')}}" class="container-sm mb-3 text-center rounded" style=" max-width:600px;">            
     </div>        
 </section>
+
 {% endblock %}

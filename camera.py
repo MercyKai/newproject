@@ -1,4 +1,4 @@
-# Importh the necessary libraries
+# Import the necessary libraries
 import cv2
 import numpy as np
 from tensorflow.keras.models import load_model
@@ -20,7 +20,7 @@ class VideoCamera(object):
     def __del__(self):
         self.video.release()
 
-    # capture and process frames
+    # Capture and process the video frames
     def get_frame(self):
         ret, frame = self.video.read()
         if not ret:
@@ -30,28 +30,28 @@ class VideoCamera(object):
         # Detect faces in the frame
         faces = face_cascade.detectMultiScale(gray, 1.3, 5)
 
-        # process each detected faces
+        # Process each detected face
         for (x, y, w, h) in faces:
-            # crop the detected face
+            # Crop the detected face
             face_detect=gray[y:y + h, x:x + w] 
-            # resize the cropped face
+            # Resize the cropped face
             roi = cv2.resize(face_detect, (48, 48), interpolation=cv2.INTER_AREA)
             # Normalize the ROI
             normalize=roi/255.0
-            # Reshape the image to 1 batch size to match the input of the model
+            # Reshape the image to match the input of the model
             reshaped=normalize.reshape(1, 48, 48, 1)
             # Make a prediction using the model
             prediction=model.predict(reshaped)
-            # find the index of the highest probability
+            # Find the index of the highest probability
             label=np.argmax(prediction, axis=1)[0]
-            # Convert to the label
+            # Map index to the correct label
             emotion_text=emotions[label]
 
             # Draw bounding box and label
             cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-            cv2.putText(frame, emotion_text, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2, cv2.LINE_AA)     
+            cv2.putText(frame, emotion_text, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2, cv2.LINE_AA)     
 
-        #Encode frame as JPEG for real-time processing
+        # Encode frame as JPEG for real-time processing
         ret, jpg = cv2.imencode('.jpg', frame)
         return jpg.tobytes()
 
@@ -81,8 +81,8 @@ def process_image(image_path, output_path):
 
         # Draw bounding box and label
         cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
-        cv2.putText(image, emotion_text, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2, cv2.LINE_AA)     
+        cv2.putText(image, emotion_text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2, cv2.LINE_AA)     
 
-    # save the processed image
+    # Save the processed image
     cv2.imwrite(output_path, image)
     return output_path
