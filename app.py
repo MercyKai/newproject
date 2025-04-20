@@ -109,7 +109,7 @@ def predict():
             predicted_path = os.path.join(app.config['PREDICTED_FOLDER'], predicted_filename)
             file.save(predicted_path)
             # call the process image function to predict the image
-            result=process_image(predicted_path, predicted_path)
+            process_image(predicted_path)
             # display the processed image
             return render_template('predict.html', image_path=predicted_filename)
         else:

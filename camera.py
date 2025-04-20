@@ -32,6 +32,8 @@ class VideoCamera(object):
 
         # Process each detected face
         for (x, y, w, h) in faces:
+            # Draw a rectangle around the detected face
+            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
             # Crop the detected face
             face_detect=gray[y:y + h, x:x + w] 
             # Resize the cropped face
@@ -47,26 +49,27 @@ class VideoCamera(object):
             # Map index to the correct label
             emotion_text=emotions[label]
 
-            # Draw bounding box and label
-            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            # Display the emotion label on the frame
             cv2.putText(frame, emotion_text, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2, cv2.LINE_AA)     
 
         # Encode frame as JPEG for real-time processing
         ret, jpg = cv2.imencode('.jpg', frame)
         return jpg.tobytes()
 
-def process_image(image_path, output_path):
+def process_image(image_path):
     # Read the image
     image = cv2.imread(image_path)
-    if image is None:
-        return None
 
    # Convert image to grayscale
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     # Detect faces in the image
     faces = face_cascade.detectMultiScale(gray, 1.3, 5)
 
+    # Process each detected face    
     for (x, y, w, h) in faces:
+        # Draw bounding box and label
+        cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
+        # Crop the detected face
         face_detect=gray[y:y + h, x:x + w] 
         # Extract the face region of interest (ROI) from the image
         roi = cv2.resize(face_detect, (48, 48), interpolation=cv2.INTER_AREA)
@@ -79,10 +82,9 @@ def process_image(image_path, output_path):
         label=np.argmax(prediction, axis=1)[0]
         emotion_text=emotions[label]
 
-        # Draw bounding box and label
-        cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
+        # Display the emotion label on the image
         cv2.putText(image, emotion_text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2, cv2.LINE_AA)     
 
     # Save the processed image
-    cv2.imwrite(output_path, image)
-    return output_path
+    cv2.imwrite(image_path, image)
+    return image_path
