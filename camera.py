@@ -15,9 +15,11 @@ emotions = {0: "Angry", 1: "Disgust", 2: "Fear", 3: "Happy", 4: "Neutral", 5: "S
 # Create a class to handle video streaming
 class VideoCamera(object):
     def __init__(self):
-        self.video = cv2.VideoCapture(0)
+        # Open the default camera (0)
+        self.video = cv2.VideoCapture(0) 
 
     def __del__(self):
+        # Release the camera when the object is destroyed
         self.video.release()
 
     # Capture and process the video frames
@@ -34,16 +36,16 @@ class VideoCamera(object):
         for (x, y, w, h) in faces:
             # Draw a rectangle around the detected face
             cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-            # Crop the detected face
-            face_detect=gray[y:y + h, x:x + w] 
-            # Resize the cropped face
-            roi = cv2.resize(face_detect, (48, 48), interpolation=cv2.INTER_AREA)
-            # Normalize the ROI
-            normalize=roi/255.0
-            # Reshape the image to match the input of the model
-            reshaped=normalize.reshape(1, 48, 48, 1)
+            # Extract the region of interest (ROI)
+            roi = gray[y:y + h, x:x + w] 
+            # Resize the ROI face to the model input size
+            roi_resized = cv2.resize(roi, (48, 48), interpolation=cv2.INTER_AREA)
+            # Normalize the pixel values to be between 0 and 1
+            roi_normalized=roi_resized/255.0
+            # Reshape to match the input of the model
+            roi_reshaped=roi_normalized.reshape(1, 48, 48, 1)
             # Make a prediction using the model
-            prediction=model.predict(reshaped)
+            prediction=model.predict(roi_reshaped)
             # Find the index of the highest probability
             label=np.argmax(prediction, axis=1)[0]
             # Map index to the correct label
@@ -60,25 +62,19 @@ def process_image(image_path):
     # Read the image
     image = cv2.imread(image_path)
 
-   # Convert image to grayscale
+    # Convert image to grayscale
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     # Detect faces in the image
     faces = face_cascade.detectMultiScale(gray, 1.3, 5)
 
     # Process each detected face    
-    for (x, y, w, h) in faces:
-        # Draw bounding box and label
+    for (x, y, w, h) in faces:        
         cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
-        # Crop the detected face
-        face_detect=gray[y:y + h, x:x + w] 
-        # Extract the face region of interest (ROI) from the image
-        roi = cv2.resize(face_detect, (48, 48), interpolation=cv2.INTER_AREA)
-        # Normalize the ROI
-        normalize=roi/255.0
-        # Reshape the image to match the input of the model
-        reshaped=normalize.reshape(1, 48, 48, 1)
-        # Make a prediction using the model
-        prediction=model.predict(reshaped)
+        roi = gray[y:y + h, x:x + w] 
+        roi_resized = cv2.resize(roi, (48, 48), interpolation=cv2.INTER_AREA)
+        roi_normalized=roi_resized/255.0
+        roi_reshaped=roi_normalized.reshape(1, 48, 48, 1)
+        prediction=model.predict(roi_reshaped)
         label=np.argmax(prediction, axis=1)[0]
         emotion_text=emotions[label]
 
