@@ -45,9 +45,7 @@ def index():
         account=cursor.fetchone()
         #check if account exists
         if account:
-            session['loggedin']=True
-            session['id']=account['id']
-            session['email']=account['email']
+            session['loggedin'] = True
             return redirect(url_for('home'))
         else:
             #if account does not exist, show an error message
