@@ -9,15 +9,15 @@ from werkzeug.utils import secure_filename
 # Initialize the web app
 app = Flask(__name__)
 
-# secret key for sessions
+# Secret key for sessions
 app.secret_key='default_key'
 
-# configure for file uploads, the allowed file types and storage
+# Configure the allowed file extensions and folder for storage
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 PREDICTED_FOLDER = os.path.join('static', 'predicted')
 app.config['PREDICTED_FOLDER'] = PREDICTED_FOLDER
 
-# check if uploaded file has an allowed extension
+# Check if an uploaded file has an allowed extension
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -30,29 +30,30 @@ app.config['MYSQL_DB']='emotion_db'
 # initialize the MySQL connection
 mysql=MySQL(app)
 
-# Index page
+# Index page for login
 @app.route('/',methods=['GET','POST'])
 def index():
-    #store the messages for errors
+    # Store the messages for errors
     msg=''
-    #check if the request method is POST
     if request.method=='POST':
+        # Get the form data
         email=request.form['email']
         password=request.form['password']
-        #create a cursor
+        # Create a database cursor
         cursor=mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        # Execute query to find if the account exists
         cursor.execute('SELECT * FROM users WHERE email=%s AND password=%s',(email,password))
         account=cursor.fetchone()
-        #check if account exists
         if account:
+            # If the account exists, mark the user as logged in and redirect to the home page
             session['loggedin'] = True
             return redirect(url_for('home'))
         else:
-            #if account does not exist, show an error message
+            # If the account does not exist, show an error message
             msg='Invalid email or password!'
     return render_template('index.html',msg=msg)
 
-#register route
+# Registration route
 @app.route('/register',methods=['GET','POST'])
 def register():
     msg=''
@@ -63,7 +64,6 @@ def register():
         email=request.form['email']        
         password=request.form['password']
 
-        # Create a cursor
         cursor =mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute('SELECT * FROM users WHERE email=%s',(email,))
         # Check if the email already exists
@@ -71,67 +71,73 @@ def register():
         if account:
             # Display an error message, if the email already exists
             msg='Email already exists!'
-            # Ensure the format is correct
+            # Ensure the format is correct and if not, display an error message
         elif not re.match(r'^[a-zA-Z0-9](\.?[a-zA-Z0-9]){5,29}@gmail\.com$', email):
             msg = 'Invalid email address!'
         else:
+            # Insert the new user into the database
             cursor.execute('INSERT INTO users (fName,lName,email,password) VALUES (%s,%s,%s,%s)',(fName,lName,email,password))
             # Commit the data to the database
             mysql.connection.commit()
+            # Redirect to the login page
             return redirect(url_for('index'))
     return render_template('register.html',msg=msg)
 
+# Home page route
 @app.route('/home')
 def home():
-    # check to see if the user is logged in
+    # Check to see if the user is logged in
     if 'loggedin' not in session:
-        # if not, redirect to the login page
+        # If not, redirect to the login page
         return redirect(url_for('index'))
-    # if logged in, display the home page
+    # If logged in, display the home page
     return render_template('home.html')
 
-# Image prediction for emotion recognition
+# Image prediction route for file uploads
 @app.route('/predict',methods=['GET', 'POST'])
 def predict():
     msg=''
-    # check if post request has file part
     if request.method=='POST':  
-        # get the file from the post request
+        # Get the file from the post request
         file = request.files['imagefile'] 
-        # only allow image files
+        # Only allow image files with the allowed extensions
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            # write the filename for the predicted image
+            # Write a new filename for the predicted image
             predicted_filename = "predicted_" + filename
-            # Define filename for the predicted image
+            # Define the path to save the predicted image
             predicted_path = os.path.join(app.config['PREDICTED_FOLDER'], predicted_filename)
+            # Save the uploaded file to the predicted folder
             file.save(predicted_path)
-            # call the process image function to predict the image
+            # Call the process image function to predict the image
             process_image(predicted_path)
-            # display the processed image
+            # Display the predicted image
             return render_template('predict.html', image_path=predicted_filename)
         else:
-            # display the an error message if the file is not allowed
-            msg='Invalid file type! Only images are allowed!'
+            # Display an error message if the file type is not allowed
+            msg= 'Invalid file type! Only PNG, JPG, and JPEG are allowed.'
     return render_template('predict.html',msg=msg)
 
-# Emotion recognition via webcam
+# Real-time Emotion recognition via webcam
 @app.route('/main')
 def main():
     return render_template('main.html')
 
+# Function to generate video frames
 def gen(camera):
     while True:
+        # Capture and process frames
         frame=camera.get_frame()
         yield(b'--frame\r\n'
               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
 
-# Video frame in main page
+# Video streaming using webcam
 @app.route('/video')
 def video():
+    # Stream video frames 
     return Response(gen(VideoCamera()),mimetype='multipart/x-mixed-replace; boundary=frame')
 
-# logout user when they press logout
+# Logout route for clearing session and redirects to login page
 @app.route('/logout')
 def logout():
     session.clear()
